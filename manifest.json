@@ -2,7 +2,7 @@
     "manifest_version": 2,
   
     "name": "Youtube Subtitle",
-    "description": "Mark the subtitles made from Amara on YouTube.",
+    "description": "Display 3rd-party(Amara) subtitles on youtube video",
     "version": "1.0.0",
 
     "background": {
