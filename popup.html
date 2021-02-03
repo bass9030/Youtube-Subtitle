@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap');
+        body
+        {
+            width: 500px;
+            height: 120px;
+            background-color: #d40000
+        }
+
+        .subtitle
+        {
+            font-size: 15px;
+            font-weight: normal;
+            font-family: 'Do Hyeon', sans-serif;
+            padding: 0px 0px 0px 0px;
+            margin: 0px 0px 0px 0px;
+        }
+
+        .title
+        {
+            text-align: center;
+            font-size: 25px;
+            font-weight: bold;
+            font-family: 'Jua', sans-serif;
+            padding: 0px 0px 0px 0px;
+            margin: 0px 0px 0px 0px;
+        }
+
+        .checkbox-container {
+            position: relative;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip:rect(0,0,0,0);
+            border: 0
+        }
+
+
+        .checkbox-container input[type="checkbox"] + label {
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .checkbox-container input[type="checkbox"] + label:before {
+            content: ' ';
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            line-height: 18px;
+            margin: -2px 8px 0 0;
+            text-align: center;
+            vertical-align: middle;
+            background: #fafafa;
+            border: 1px solid #cacece;
+            border-radius: 3px;
+            box-shadow: 0px 1px 2px rgba(0,0,0,0.05), inset 0px -15px 10px -12px rgba(0,0,0,0.05);
+        }
+
+        .checkbox-container input[type="checkbox"] + label:active:before,
+        .checkbox-container input[type="checkbox"]:checked + label:active:before {
+            box-shadow: 0px 1px 2px rgba(0,0,0,0.05), inset 0px 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .checkbox-container input[type="checkbox"]:checked + label:before {
+            content: '\2713';
+            color: #314ca2;
+            text-shadow: 1px 1px white;
+            background: #f1f4ff;
+            border-color: #adb8c0;
+            box-shadow: 0px 1px 2px rgba(0,0,0,0.05), inset 0px -15px 10px -12px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+    <script src="popup.js"></script>
+
+    <div><!--title-->
+        <p class=title>Youtube Subtitle</p>
+        <p style="font-family: 'Jua', sans-serif; text-align: center; font-size: 15px; padding: 0 0 0 0; margin: 0 0 0 0;">made by bass9030</p>
+    </div>
+
+    <div><!--language-->
+        <p class=subtitle style="margin-bottom: 5px;">language</p>
+        <select id="language" style="width: 500px; padding: 0 0 0 0; height: 20px; text-align-last: center;"/>
+    </div>
+
+    <div><!--subtitle enable-->
+        <input type="checkbox" class="checkbox-container" id="is_enable"/>
+        <label for="is_enable" class="checkbox-container" style="font-family: 'Jua', sans-serif; font-size: 15px;">Turn on subtitles</label>
+        <a id="FAQ" style="font-family: 'Jua', sans-serif; text-align: right; font-size: 15px; float: right; margin-top: 5px;">FAQ</a>
+    </div>
+</body>
+</html>
