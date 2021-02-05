@@ -64,7 +64,6 @@ function is_enable_change() {
         'enable_subtitle': val
     });
     if(!val) {
-        //TODO: remove "track" element
         chrome.tabs.executeScript({
             code: `if(document.getElementById("custom-subtitle")) {
                 let subtitle = document.getElementById("custom-subtitle");
@@ -74,7 +73,6 @@ function is_enable_change() {
             }`
         });
     }else{
-        //TODO: add "track" element
         chrome.tabs.query({'active': true, 'windowId': chrome.windows.WINDOW_ID_CURRENT}, subtitle_load);
     }
 }
@@ -155,23 +153,3 @@ function sel_language_change() {
     });
     chrome.tabs.query({'active': true, 'windowId': chrome.windows.WINDOW_ID_CURRENT}, subtitle_load);
 }
-
-/*
-var xhr = new XMLHttpRequest();
-xhr.open("GET", "https://amara.org/api/videos/9KFtSKcPfhHO/languages/ko/subtitles/?format=vtt");
-xhr.setRequestHeader("X-api-key", "5f945b6848f4adc285196bd93e4ccd1f5f331351");
-xhr.onload = () => {
-var node = document.createElement("track");
-var data_url = window.URL.createObjectURL(new Blob([xhr.response], {type: "text/vtt"}));
-node.src = data_url;
-node.style = "margin-bottom: 10px";
-node.kind = "subtitles";
-node.srclang="ko";
-node.default = true;
-node.label = "Korean";
-node.mode = "showing"
-document.getElementsByClassName("video-stream")[0].append(node);
-};
-xhr.send();*/
-
-//window.onload = onloaded;
