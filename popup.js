@@ -103,7 +103,7 @@ function subtitle_load(tabs) {
                             //document.location.href.replace(/&t=[0-9]+/g,'') + '&t=' + Math.floor(document.getElementsByClassName('video-stream')[0].getCurrentTime());
                         }
                         var xhr = new XMLHttpRequest();
-                        xhr.open("GET", "https://amara.org/api/videos/${e.id}/languages/ko/subtitles/?format=vtt");
+                        xhr.open("GET", "https://amara.org/api/videos/${e.id}/languages/${document.getElementById("language").value}/subtitles/?format=vtt");
                         xhr.setRequestHeader("X-api-key", "${api_key}");
                         xhr.onload = () => {
                             var node = document.createElement("track");

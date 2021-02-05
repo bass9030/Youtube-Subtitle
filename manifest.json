@@ -25,7 +25,9 @@
 
     "permissions": [
       "tabs",
+      "activeTab",
       "webNavigation",
-      "storage"
+      "storage",
+      "*://*/*"
     ]
   }

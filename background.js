@@ -52,7 +52,7 @@ chrome.webNavigation.onCompleted.addListener(function(details) {
                                 //document.location.href = document.location.href.replace(/&t=[0-9]+/g,'') + '&t=' + Math.floor(document.getElementsByClassName('video-stream')[0].getCurrentTime());
                             }
                             var xhr = new XMLHttpRequest();
-                            xhr.open("GET", "https://amara.org/api/videos/${e.id}/languages/ko/subtitles/?format=vtt");
+                            xhr.open("GET", "https://amara.org/api/videos/${e.id}/languages/${language}/subtitles/?format=vtt");
                             xhr.setRequestHeader("X-api-key", "${api_key}");
                             xhr.onload = () => {
                                 console.log("no custom subtitle")
