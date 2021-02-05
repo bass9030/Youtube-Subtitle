@@ -28,6 +28,6 @@
       "activeTab",
       "webNavigation",
       "storage",
-      "*://youtube.com/*"
+      "*://*.youtube.com/*"
     ]
   }
