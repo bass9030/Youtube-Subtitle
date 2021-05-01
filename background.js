@@ -13,12 +13,57 @@ function getUrlParams(url) {
 const url = chrome.runtime.getURL('languages.json');
 let languages;
 var xhr = new XMLHttpRequest();
-xhr.open("GET", url);
-xhr.responseType = "json";
-xhr.onload = () => {
-    languages = xhr.response;
-};
+xhr.open("GET", url, false);
 xhr.send();
+languages = JSON.parse(xhr.responseText);
+
+function delay(ms) {
+    let start = new Date().getTime()
+    while(new Date().getTime() - start <= ms) {
+        console.log('.');
+    }
+}
+
+function removeSubtitle(id) {
+    delay(1500);
+    chrome.tabs.executeScript(id, {
+        code: `if(document.getElementById("custom-subtitle")) {
+            console.log('work')
+            let subtitle = document.getElementById("custom-subtitle");
+            let video = document.getElementsByClassName('video-stream')[0]
+            window.URL.revokeObjectURL(subtitle.src);
+            video.removeChild(video.children[0]);
+        }`
+    })
+}
+
+function insertSubtitle(id, vid, language) {
+    chrome.tabs.executeScript(id, {
+        code: `if(document.getElementById("custom-subtitle")) {
+            console.log('work')
+            let subtitle = document.getElementById("custom-subtitle");
+            window.URL.revokeObjectURL(subtitle.src);
+            subtitle.remove();
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "https://amara.org/api/videos/${vid}/languages/${language}/subtitles/?format=vtt");
+        xhr.setRequestHeader("X-api-key", "${api_key}");
+        xhr.onload = () => {
+            console.log("no custom subtitle")
+            var node = document.createElement("track");
+            var data_url = window.URL.createObjectURL(new Blob([xhr.response], {type: "text/vtt"}));
+            node.src = data_url;
+            node.kind = "subtitles";
+            node.id = "custom-subtitle";
+            node.srclang="${language}";
+            node.default = true;
+            node.label = "${languages[language]}";
+            node.mode = "showing";
+            document.getElementsByClassName("video-stream")[0].append(node);
+        };
+        xhr.send();`
+    })
+}
 
 chrome.webNavigation.onCompleted.addListener(function(details) {
     let href = details.url;
@@ -33,71 +78,38 @@ chrome.webNavigation.onCompleted.addListener(function(details) {
         }else{
             language = "en";
         }
+        console.log('onCompleted');
         let objs;
         let xml  = new XMLHttpRequest();
         xml.open("GET", "https://amara.org/api/videos/?video_url=https://www.youtube.com/watch?v=" + getUrlParams(href).v);
         xml.setRequestHeader("X-api-key", api_key);
         xml.responseType = "json";
-        xml.onload = () => {
+        xml.onreadystatechange = () => {
+            if(xml.readyState != 4) return;
+            if(xml.status != 200) return;
+            console.log(xml.response);
             objs = xml.response.objects;
             if(objs.length != 0) {
                 objs.forEach((e) => {
                     let index = e.languages.findIndex((e) => e.code == language);
                     if(index != -1) {
                         console.log('language found!');
-                        chrome.tabs.executeScript(id, {
-                            code: `if(document.getElementById("custom-subtitle")) {
-                                let subtitle = document.getElementById("custom-subtitle");
-                                window.URL.revokeObjectURL(subtitle.src);
-                                //document.location.href = document.location.href.replace(/&t=[0-9]+/g,'') + '&t=' + Math.floor(document.getElementsByClassName('video-stream')[0].getCurrentTime());
-                            }
-                            var xhr = new XMLHttpRequest();
-                            xhr.open("GET", "https://amara.org/api/videos/${e.id}/languages/${language}/subtitles/?format=vtt");
-                            xhr.setRequestHeader("X-api-key", "${api_key}");
-                            xhr.onload = () => {
-                                console.log("no custom subtitle")
-                                var node = document.createElement("track");
-                                var data_url = window.URL.createObjectURL(new Blob([xhr.response], {type: "text/vtt"}));
-                                node.src = data_url;
-                                node.kind = "subtitles";
-                                node.id = "custom-subtitle";
-                                node.srclang="${language}";
-                                node.default = true;
-                                node.label = "${languages[language]}";
-                                node.mode = "showing";
-                                document.getElementsByClassName("video-stream")[0].append(node);
-                            };
-                            xhr.send();`
-                        })
+                        insertSubtitle(id, e.id, language);
                     }else{
                         console.log('language not found!');
-                        chrome.tabs.executeScript(id, {
-                            code: `if(document.getElementById("custom-subtitle")) {
-                                let subtitle = document.getElementById("custom-subtitle");
-                                window.URL.revokeObjectURL(subtitle.src);
-                                subtitle.remove();
-                                //document.location.href = document.location.href.replace(/&t=[0-9]+/g,'') + '&t=' + Math.floor(document.getElementsByClassName('video-stream')[0].getCurrentTime());
-                            }`
-                        })
+                        removeSubtitle(id);
                     }
                 })
             }else{
                 console.log('not have in search result');
-                chrome.tabs.executeScript(id, {
-                    code: `if(document.getElementById("custom-subtitle")) {
-                        let subtitle = document.getElementById("custom-subtitle");
-                        window.URL.revokeObjectURL(subtitle.src);
-                        subtitle.remove();
-                        //document.location.href = document.location.href.replace(/&t=[0-9]+/g,'') + '&t=' + Math.floor(document.getElementsByClassName('video-stream')[0].getCurrentTime());
-                    }`
-                });
+                removeSubtitle(id);
             }
         };
         xml.send();
     });
 });
 
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, _) {
+chrome.tabs.onUpdated.addListener(function(id, changeInfo, _) {
     console.log(changeInfo.url);
     let href = changeInfo.url;
     if(!href) return;
@@ -110,68 +122,31 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, _) {
         }else{
             language = "en";
         }
+        console.log('onUpdated');
         let objs;
         let xml  = new XMLHttpRequest();
         xml.open("GET", "https://amara.org/api/videos/?video_url=https://www.youtube.com/watch?v=" + getUrlParams(href).v);
         xml.setRequestHeader("X-api-key", api_key);
         xml.responseType = "json";
-        xml.onload = () => {
+        xml.onreadystatechange = () => {
+            if(xml.readyState != 4) return;
+            if(xml.status != 200) return;
+            console.log(xml.response);
             objs = xml.response.objects;
             if(objs.length != 0) {
-                let e = objs[0];
+                objs.forEach((e) => {
                     let index = e.languages.findIndex((e) => e.code == language);
                     if(index != -1) {
                         console.log('language found!');
-                        chrome.tabs.executeScript(tabId, {
-                            code: `function sleep (delay) {
-                                var start = new Date().getTime();
-                                while (new Date().getTime() < start + delay);
-                            }
-                            if(document.getElementById("custom-subtitle")) {
-                                document.getElementsByClassName("video-stream")[0].src = "";
-                                window.location.reload();
-                            }
-                            var xhr = new XMLHttpRequest();
-                            xhr.open("GET", "https://amara.org/api/videos/${e.id}/languages/ko/subtitles/?format=vtt");
-                            xhr.setRequestHeader("X-api-key", "${api_key}");
-                            xhr.onload = () => {
-                                console.log("no custom subtitle")
-                                var node = document.createElement("track");
-                                var data_url = window.URL.createObjectURL(new Blob([xhr.response], {type: "text/vtt"}));
-                                node.src = data_url;
-                                node.kind = "subtitles";
-                                node.id = "custom-subtitle";
-                                node.srclang="${language}";
-                                node.default = true;
-                                node.label = "${languages[language]}";
-                                node.mode = "showing";
-                                document.getElementsByClassName("video-stream")[0].append(node);
-                            };
-                            xhr.send();`
-                        })
+                        insertSubtitle(id, e.id, language);
                     }else{
                         console.log('language not found!');
-                        chrome.tabs.executeScript(tabId, {
-                            code: `if(document.getElementById("custom-subtitle")) {
-                                let subtitle = document.getElementById("custom-subtitle");
-                                window.URL.revokeObjectURL(subtitle.src);
-                                subtitle.remove();
-                                document.getElementsByClassName("video-stream")[0].src = "";
-                                window.location.reload();
-                            }`
-                        })
+                        removeSubtitle(id);
                     }
+                })
             }else{
                 console.log('not have in search result');
-                chrome.tabs.executeScript(tabId, {
-                    code: `if(document.getElementById("custom-subtitle")) {
-                        let subtitle = document.getElementById("custom-subtitle");
-                        window.URL.revokeObjectURL(subtitle.src);
-                        subtitle.remove();
-                        document.getElementsByClassName("video-stream")[0].src = "";
-                        window.location.reload();
-                    }`
-                });
+                removeSubtitle(id);
             }
         };
         xml.send();
